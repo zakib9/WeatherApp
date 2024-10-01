@@ -3,6 +3,8 @@ import { computed, inject, ref } from 'vue';
 
 const store = inject("store")
 const searchQuery = ref("")
+const showDropdown = ref(false)
+let timer = ref(null)
 const currentWeather = computed(() => {
   return store.state.currentWeather
 })
@@ -13,22 +15,29 @@ const currentLocation = computed(() => {
   return store.state.currentLocation
 })
 function getSearchResults(){
+  showDropdown.value = !showDropdown.value
   if (searchQuery.value != '') {
     store.state.actions.setLocation(searchQuery.value)
     
     }
 }
 function searchWeather(name){
+  if(timer.value){
+    console.log("clear")
+    clearInterval(timer.value)
+  }
+  showDropdown.value = !showDropdown.value
   searchQuery.value = null
   store.state.actions.setWeather(name)
-  setInterval(() => {
+  timer.value =  setInterval(() => {
     store.state.actions.setWeather(name)
   }, 10000)
+ 
 }
 </script>
 
 <template>
-   <div class=" w-4/6 h-min px-8 py-2 flex gap-6 rounded-md shadow-lg items-center overflow-hidden my-10 mx-auto">
+   <div class=" w-4/6 h-min px-8 py-2 flex gap-6 rounded-md shadow-lg items-center overflow-hidden mt-10 mx-auto">
       <i class="fa-solid fa-magnifying-glass fa-xl" style="color: #919191;"></i>
       <input
       type="text"
@@ -37,7 +46,7 @@ function searchWeather(name){
       placeholder="Location..."
       class=" placeholder:text-lg bg-transparent p-4 focus:outline-none w-full">
     </div>
-    <ul v-if="!finalLocation" class=" w-4/6  flex flex-col rounded-md shadow-lg mx-auto ">
+    <ul v-if="showDropdown" class=" w-4/6  flex flex-col rounded-md shadow-lg left-64 absolute">
       <li v-for="name in currentLocation.data" :key="name.id" class=" py-2 px-8 hover:bg-slate-200" @click="searchWeather(name.name)">
       {{name.name}}
     </li>
