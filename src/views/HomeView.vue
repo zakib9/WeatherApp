@@ -1,10 +1,9 @@
 <script setup>
-import { computed, inject, ref } from 'vue';
+import { computed, inject, ref, watch } from 'vue';
 
 const store = inject("store")
 const searchQuery = ref("")
 const showDropdown = ref(false)
-let timer = ref(null)
 const currentWeather = computed(() => {
   return store.state.currentWeather
 })
@@ -21,19 +20,12 @@ function getSearchResults(){
     
     }
 }
-function searchWeather(name){
-  if(timer.value){
-    console.log("clear")
-    clearInterval(timer.value)
-  }
+ function searchWeather(name){
   showDropdown.value = !showDropdown.value
   searchQuery.value = null
   store.state.actions.setWeather(name)
-  timer.value =  setInterval(() => {
-    store.state.actions.setWeather(name)
-  }, 10000)
- 
 }
+
 </script>
 
 <template>
@@ -52,11 +44,19 @@ function searchWeather(name){
     </li>
     </ul>
 
-    <div class="flex flex-col gap-4 mt-40 min-w-full  items-center">
-      <h1 class="text-4xl font-bold ">{{ finalLocation }}</h1>
-      <p v-if="currentWeather" class="text-6xl font-thin">{{ Math.round(currentWeather.data.current.temp_c)  }} °C</p>
+    
+    
+      <div v-if="currentWeather != null" class="flex flex-col gap-4 mt-40 min-w-full items-center">
+        <h1 class="text-4xl font-bold">{{ finalLocation }}</h1>
+        <p v-if="currentWeather" class="text-6xl font-thin">{{ Math.round(currentWeather.data.current.temp_c)  }} °C</p>
       <img v-if="currentWeather" :src="currentWeather.data.current.condition.icon" alt="">
       <p v-if="currentWeather" class="text-6xl font-thin">{{ currentWeather.data.current.condition.text }}</p>
-    </div>
+      </div>
+      <div v-else class="flex flex-col gap-4 mt-40 min-w-full items-center">
+        <p class="text-6xl font-thin">Choose location...</p>
+      </div>
+    
+    
+  
     
 </template>
